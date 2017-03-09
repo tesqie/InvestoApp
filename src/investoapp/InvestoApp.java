@@ -13,8 +13,6 @@ import java.util.Scanner;
  *
  * @author tesqie
  */ 
-//HELLO
-//sdfsdfsdjkh
 public class InvestoApp {
 
     public static void main(String[] args) throws MalformedURLException, IOException {
