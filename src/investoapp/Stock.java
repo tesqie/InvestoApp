@@ -36,6 +36,11 @@ public class Stock implements ApiConnection {
         this.ticker = ticker;
     }
 
+    public Price getPrice() {
+        return price;
+    }
+
+    
     @Override
     public void connectAndFetch(String symbol) {
 
