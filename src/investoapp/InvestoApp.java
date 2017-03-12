@@ -34,8 +34,18 @@ public class InvestoApp extends Application implements Serializable {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Stock appleStock = new Stock("AAPL");
-        appleStock.connectAndFetch(appleStock.getTicker());
+        
+//        Stock appleStock = new Stock("AAPL");
+//        appleStock.connectAndFetch(appleStock.getTicker());
+//        
+//        Screener screen = new Screener("netincome","gt",90000.0);
+//        
+//        String condition = "netincome~gt~90000.0";
+//        screen.connectAndFetch(condition);
+        ArrayList<Account> accounts = new ArrayList<>();
+        
+        
+        
 
         //ArrayList<Account> accounts = new ArrayList<>();
         //Account account = new Account();
@@ -43,24 +53,24 @@ public class InvestoApp extends Application implements Serializable {
         //System.out.println(accounts.get(0).getUsername());
         //System.out.println(accounts);
         //System.out.println(appleStock.getIndustry_category());
-        Scanner input = new Scanner(System.in);
-        System.out.println("New account = 1");
-        //  int selection = Integer.parseInt(input.nextLine());
-//        while (selection == 1){
-        //newAccount();
-        
-
-        System.out.println("Enter Username");
-        String username = input.nextLine();
-        System.out.println("Enter Password");
-        String password = input.nextLine();
-        SHA256InJava sj = new SHA256InJava();
-        String passwordHash = sj.getSHA256Hash(password);
-        System.out.println("Enter Email");
-        String email = input.nextLine();
-
-        //System.out.println(accounts.get(0).getUsername());
-        Account account = new Account(username, passwordHash, email);
+//        Scanner input = new Scanner(System.in);
+//        System.out.println("New account = 1");
+//        //  int selection = Integer.parseInt(input.nextLine());
+////        while (selection == 1){
+//        //newAccount();
+//        
+//
+//        System.out.println("Enter Username");
+//        String username = input.nextLine();
+//        System.out.println("Enter Password");
+//        String password = input.nextLine();
+//        SHA256InJava sj = new SHA256InJava();
+//        String passwordHash = sj.getSHA256Hash(password);
+//        System.out.println("Enter Email");
+//        String email = input.nextLine();
+//
+//        //System.out.println(accounts.get(0).getUsername());
+//        Account account = new Account(username, passwordHash, email);
         //return account;
         //System.out.println(account);
         //save(accounts);
@@ -70,31 +80,31 @@ public class InvestoApp extends Application implements Serializable {
 //        }
 
         //input.close();
-        Properties loadProps = new Properties();
-        InputStream is = new FileInputStream("users.properties");
-        loadProps.load(is);
-
-        int users = Integer.parseInt(loadProps.get("#users").toString());
-
-        System.out.println(users);
-
-        Properties saveAccount = new Properties();
-
-        String username1 = account.getUsername();
-        String password1 = account.getPassword();
-        saveAccount.setProperty(users + "user.", username1 + "=" + password1);
-        File creds = new File("cred.properties");
-        OutputStream out1 = new FileOutputStream(creds, true);
-        saveAccount.store(out1, "User creds");
-
-        users += 1;
-        String userss = String.format("" + users);
-
-        Properties props = new Properties();
-        props.setProperty("#users", userss);
-        File userNumber = new File("users.properties");
-        OutputStream out = new FileOutputStream(userNumber);
-        props.store(out, "#users");
+//        Properties loadProps = new Properties();
+//        InputStream is = new FileInputStream("users.properties");
+//        loadProps.load(is);
+//
+//        int users = Integer.parseInt(loadProps.get("#users").toString());
+//
+//        System.out.println(users);
+//
+//        Properties saveAccount = new Properties();
+//
+//        String username1 = account.getUsername();
+//        String password1 = account.getPassword();
+//        saveAccount.setProperty(users + "user.", username1 + "=" + password1);
+//        File creds = new File("cred.properties");
+//        OutputStream out1 = new FileOutputStream(creds, true);
+//        saveAccount.store(out1, "User creds");
+//
+//        users += 1;
+//        String userss = String.format("" + users);
+//
+//        Properties props = new Properties();
+//        props.setProperty("#users", userss);
+//        File userNumber = new File("users.properties");
+//        OutputStream out = new FileOutputStream(userNumber);
+//        props.store(out, "#users");
 
         //System.out.println(hash);
 //        Properties props = new Properties();
@@ -137,43 +147,42 @@ public class InvestoApp extends Application implements Serializable {
 //        System.out.println(condition);
     }
 
-    // public Account newAccount() throws IOException  {
-//        Scanner input = new Scanner(System.in);
+     public void newAccount(ArrayList<Account> accounts) throws IOException  {
+        Scanner input = new Scanner(System.in);
+        //ArrayList<Account> accounts = new ArrayList<>();
+        System.out.println("Enter Username");
+        String uname = input.nextLine();
+        System.out.println("Enter Password");
+        String pass = input.nextLine();
+        SHA256InJava sj = new SHA256InJava();
+        String passwordHash = sj.getSHA256Hash(pass);
+        System.out.println("Enter Email");
+        String inputEmail = input.nextLine();
+        
+        accounts.add(new Account(uname,passwordHash,inputEmail));
+        
+     }
+//    public void save(ArrayList<Account> accounts) throws FileNotFoundException, IOException {
+//        FileOutputStream fos = new FileOutputStream("creds.ser");
+//        ObjectOutputStream oos = new ObjectOutputStream(fos);
+//        oos.writeObject(accounts);
+//        oos.close();
+//        fos.close();
+//    }
+
+//    public void load() throws FileNotFoundException, IOException, ClassNotFoundException {
+//        try (FileInputStream fis = new FileInputStream("creds.ser"); ObjectInputStream ois = new ObjectInputStream(fis)) {
+//            ArrayList<Account> accounts2 = (ArrayList<Account>) ois.readObject();
 //
-//        System.out.println("Enter Username");
-//        String username = input.nextLine();
-//        System.out.println("Enter Password");
-//        String password = input.nextLine();
-//        SHA256InJava sj = new SHA256InJava();
-//        String passwordHash = sj.getSHA256Hash(password);
-//        System.out.println("Enter Email");
-//        String email = input.nextLine();
-//        
-//        //System.out.println(accounts.get(0).getUsername());
-//        Account account = new Account(username, passwordHash, email);
-//        return account;
-//        //System.out.println(account);
-//        //save(accounts);
-    // }
-    public void save(ArrayList<Account> accounts) throws FileNotFoundException, IOException {
-        FileOutputStream fos = new FileOutputStream("creds.ser");
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(accounts);
-        oos.close();
-        fos.close();
-    }
-
-    public void load() throws FileNotFoundException, IOException, ClassNotFoundException {
-        try (FileInputStream fis = new FileInputStream("creds.ser"); ObjectInputStream ois = new ObjectInputStream(fis)) {
-            ArrayList<Account> accounts2 = (ArrayList<Account>) ois.readObject();
-
-        } catch (IOException ioe) {
-        } catch (ClassNotFoundException c) {
-            System.out.println("Class not found");
-        }
-        //  System.out.println(accounts);
-        // return accounts;
-    }
+//        } catch (IOException ioe) {
+//        } catch (ClassNotFoundException c) {
+//            System.out.println("Class not found");
+//        }
+//        //  System.out.println(accounts);
+//        // return accounts;
+//    }
+    
+    
 
     public void login(String username, String password) {
 

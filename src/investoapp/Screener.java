@@ -8,15 +8,47 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
  * @author tesqie
  */
-public class Screener implements ApiConnection{
+public class Screener implements ApiConnection {
+/*
+    Screener conditions:
+    EPS
+    P/E
+    sales
+    dividend rate
+    dividend payout ratio
+    dividend yield 5 year average
+    share price
+    change %
+    country
+    sector
+    group
+    avg Volume
+    Shares
+    Div/yield
+    return on equity
+    return on assets
+    3 year annual rev growth
+    3 year annual income growth
+    3 year annual dividend growth 
+    5 year annual revenue growth
+    5 year annaul income growth
+    5 year annual dividend growth
+    
+    */
+    private String jsonTicker;
+    private String jsonValue;
     private final String Tag;
     private final String operator;
     private final Double value;
@@ -38,7 +70,6 @@ public class Screener implements ApiConnection{
     public Double getValue() {
         return value;
     }
- 
 
     @Override
     public void connectAndFetch(String symbol) {
@@ -57,17 +88,31 @@ public class Screener implements ApiConnection{
                 while ((inputLine = in.readLine()) != null) {
                     jsonParser(inputLine);
                 }
-            }        } catch (MalformedURLException ex) {
+            }
+        } catch (MalformedURLException ex) {
             Logger.getLogger(Stock.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Stock.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-
     @Override
     public void jsonParser(String jsonStock) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonStock);
+            JSONArray jsonArray = (JSONArray) jsonObject.get("data");
+            ArrayList<JSONObject> jsonObjArray = new ArrayList<>();
+            for (int i = 0;i <jsonArray.size();i++){
+                jsonObjArray.add((JSONObject)jsonArray.get(i));
+            }
+            
+            System.out.println(jsonObjArray.get(6));
+
+        } catch (ParseException ex) {
+            Logger.getLogger(Screener.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-    
+
 }

@@ -1,7 +1,4 @@
 package investoapp;
-
-
-
 /**
  *
  * @author tesqie

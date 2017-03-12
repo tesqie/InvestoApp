@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import javax.xml.bind.DatatypeConverter;
 
 /**
- *
  * @author tesqie
  */
 public class SHA256InJava {
