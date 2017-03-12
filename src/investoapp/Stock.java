@@ -27,10 +27,7 @@ public class Stock implements ApiConnection {
     private String hq_country;
     private String sector;
     private String industry_category;
-    private String industry_group;
-    private String stock_exchange;
-    private double SharesOwned;
-    private double purchasePrice;
+    private String industry_group;   
     //private String jsonStock; 
     
     private Price price;
@@ -41,14 +38,6 @@ public class Stock implements ApiConnection {
 
     public Price getPrice() {
         return price;
-    }
-
-    public String getStock_exchange() {
-        return stock_exchange;
-    }
-
-    public void setStock_exchange(String stock_exchange) {
-        this.stock_exchange = stock_exchange;
     }
 
     
@@ -95,7 +84,6 @@ public class Stock implements ApiConnection {
             setSector(jsonObject.get("sector").toString());
             setIndustry_category(jsonObject.get("industry_category").toString());
             setIndustry_group(jsonObject.get("industry_group").toString());
-            setStock_exchange(jsonObject.get("stock_exchange").toString());
         } catch (ParseException ex) {
             Logger.getLogger(Stock.class.getName()).log(Level.SEVERE, null, ex);
         }
