@@ -1,17 +1,17 @@
 package investoapp;
 
-import java.io.ByteArrayOutputStream;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
+
 
 /**
  *
@@ -26,8 +26,6 @@ public class Account implements Serializable {
 
     public Account() {
     }
-    
-    
 
     public Account(String username, String password, String email) {
         this.username = username;
@@ -66,32 +64,49 @@ public class Account implements Serializable {
 
     public void save(ArrayList<Account> accounts) {
         try {
-// Serialize data object to a file
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("creds.ser"));
-            out.writeObject(accounts);
-            out.close();
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("creds.ser"))) {
+                out.writeObject(accounts);
+            }
 
-// Serialize data object to a byte array
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            out = new ObjectOutputStream(bos);
-            out.writeObject(accounts);
-            out.close();
-
-// Get the bytes of the serialized object
-            byte[] buf = bos.toByteArray();
         } catch (IOException e) {
         }
     }
-    public void load() throws FileNotFoundException, IOException, ClassNotFoundException {
+
+    public ArrayList<Account> load() throws FileNotFoundException, IOException, ClassNotFoundException, Exception {
         try (FileInputStream fis = new FileInputStream("creds.ser"); ObjectInputStream ois = new ObjectInputStream(fis)) {
             ArrayList<Account> accounts = (ArrayList<Account>) ois.readObject();
-
+            return accounts;
         } catch (IOException ioe) {
         } catch (ClassNotFoundException c) {
             System.out.println("Class not found");
         }
-        //  System.out.println(accounts);
-        // return accounts;
+        Exception IllegalStateException = null;
+        throw IllegalStateException;
+
     }
-   
+    public void newAccount() throws IOException, ClassNotFoundException, Exception {
+        File varTmpDir = new File("creds.ser");
+        boolean exists = varTmpDir.exists();
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("Enter Username");
+        String uname = input.nextLine();
+        System.out.println("Enter Password");
+        String pass = input.nextLine();
+        SHA256InJava sj = new SHA256InJava();
+        String passwordHash = sj.getSHA256Hash(pass);
+        System.out.println("Enter Email");
+        String inputEmail = input.nextLine();
+
+        if (!exists) {
+            ArrayList<Account> accounts = new ArrayList<>();
+            accounts.add(new Account(uname, passwordHash, inputEmail));
+            save(accounts);
+        } else {
+            ArrayList<Account> accounts = load();
+            accounts.add(new Account(uname, passwordHash, inputEmail));
+            save(accounts);         
+        }
+    }
+
 }
