@@ -1,6 +1,5 @@
 package investoapp;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,7 +10,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Scanner;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -62,51 +62,44 @@ public class Account implements Serializable {
         return getUsername() + "=" + getPassword();
     }
 
-    public void save(ArrayList<Account> accounts) {
+    public void save(Account saveAccount) {
+        File file = new File("creds.ser");
+        ArrayList<Account> accounts;
+
         try {
+            if (!file.exists()) {
+                accounts = new ArrayList<>();
+                accounts.add(saveAccount);
+
+            } else {
+                accounts = load();
+                accounts.add(saveAccount);
+
+            }
+
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("creds.ser"))) {
                 out.writeObject(accounts);
             }
 
         } catch (IOException e) {
+        } catch (Exception ex) {
+            Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public ArrayList<Account> load() throws FileNotFoundException, IOException, ClassNotFoundException, Exception {
-        try (FileInputStream fis = new FileInputStream("creds.ser"); ObjectInputStream ois = new ObjectInputStream(fis)) {
+    public ArrayList<Account> load() {
+        
+        
+        try (FileInputStream fis = new FileInputStream("creds.ser");
+                ObjectInputStream ois = new ObjectInputStream(fis)) {
             ArrayList<Account> accounts = (ArrayList<Account>) ois.readObject();
             return accounts;
+
         } catch (IOException ioe) {
         } catch (ClassNotFoundException c) {
             System.out.println("Class not found");
         }
-        Exception IllegalStateException = null;
-        throw IllegalStateException;
-
-    }
-    public void newAccount() throws IOException, ClassNotFoundException, Exception {
-        File varTmpDir = new File("creds.ser");
-        boolean exists = varTmpDir.exists();
-        Scanner input = new Scanner(System.in);
-
-        System.out.println("Enter Username");
-        String uname = input.nextLine();
-        System.out.println("Enter Password");
-        String pass = input.nextLine();
-        SHA256InJava sj = new SHA256InJava();
-        String passwordHash = sj.getSHA256Hash(pass);
-        System.out.println("Enter Email");
-        String inputEmail = input.nextLine();
-
-        if (!exists) {
-            ArrayList<Account> accounts = new ArrayList<>();
-            accounts.add(new Account(uname, passwordHash, inputEmail));
-            save(accounts);
-        } else {
-            ArrayList<Account> accounts = load();
-            accounts.add(new Account(uname, passwordHash, inputEmail));
-            save(accounts);         
-        }
+        return null;
     }
 
 }

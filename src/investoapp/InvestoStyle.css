@@ -1,0 +1,45 @@
+.settingsPane1{
+    -fx-background-color: greenyellow;  
+}
+.portfolioPane1{
+    -fx-background-color: red;  
+}
+.recentPane1{
+    -fx-background-color: blueviolet;  
+}
+
+.searchPane1{
+    -fx-background-color: grey;  
+}
+.searchTextField{
+ 
+
+}
+.homeLabel{
+    -fx-alignment:TOP_CENTER;
+    -fx-text-fill: white;
+}
+.button{
+    -fx-background-color: rosybrown;
+    -fx-text-fill: white;
+
+}
+.buttonAdd{
+    -fx-background-color: indigo;
+    -fx-text-fill: white;
+}
+scene{
+    -fx-background-color: white;
+}
+.selectionPane{
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+    -fx-alignment: CENTER;
+}
+
+
+.circle{
+    -fx-fill:transparent;
+    -fx-stroke:white;
+    -fx-stroke-width:20;
+}
