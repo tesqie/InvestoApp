@@ -111,7 +111,7 @@ public class Screener implements ApiConnection {
             System.out.println(jsonObjArray.get(6));
 
         } catch (ParseException ex) {
-            Logger.getLogger(Screener.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.toString());
         }
     }
 

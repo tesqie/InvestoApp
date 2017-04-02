@@ -2,14 +2,12 @@ package investoapp;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +20,7 @@ public class Account implements Serializable {
     private String username;
     private String password;
     private String email;
-    private ArrayList<Portfolio> portfolio;
+    private Portfolio portfolio;
 
     public Account() {
     }
@@ -31,6 +29,14 @@ public class Account implements Serializable {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public Portfolio getPortfolio() {
+        return portfolio;
+    }
+    
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
     }
 
     public String getPassword() {
@@ -45,24 +51,13 @@ public class Account implements Serializable {
         return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public String toString() {
-        return getUsername() + "=" + getPassword();
-    }
-
-    public void save(Account saveAccount) {
+//    @Override
+//    public String toString() {
+//        return getUsername() + "=" + getPassword();
+//    }
+    
+    public void save(Account saveAccount,int index) {
         File file = new File("creds.ser");
         ArrayList<Account> accounts;
 
@@ -73,8 +68,13 @@ public class Account implements Serializable {
 
             } else {
                 accounts = load();
+                if (index == -1){
                 accounts.add(saveAccount);
-
+                }else if (index >=0){
+                accounts.set(index, saveAccount);
+                }
+                    
+                
             }
 
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("creds.ser"))) {
@@ -96,6 +96,7 @@ public class Account implements Serializable {
             return accounts;
 
         } catch (IOException ioe) {
+            System.out.println(ioe.toString());
         } catch (ClassNotFoundException c) {
             System.out.println("Class not found");
         }

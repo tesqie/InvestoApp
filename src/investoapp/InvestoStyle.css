@@ -43,3 +43,17 @@ scene{
     -fx-stroke:white;
     -fx-stroke-width:20;
 }
+
+.stockInfo {
+   
+    -fx-grid-lines-visible: true;
+       
+}
+
+.newsLbl{
+    -fx-border-style: solid;
+    -fx-alignment:CENTER; 
+    -fx-background-color:aqua;
+    -fx-padding: 3px;
+    
+}
