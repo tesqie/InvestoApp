@@ -14,47 +14,44 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
+ * This is a class representing information about an individual Stock
  *
- * @author tesqie
+ * @author Abdul Tesqie
  */
 public final class Stock implements ApiConnection, Serializable {
 
-    private final String ticker;
+    private String ticker;
     private String name;
     private String business_address;
     private String company_url;
-    private String ceo;
-    private String hq_state;
     private String hq_country;
     private String sector;
     private String industry_category;
-    private String industry_group;
-    private String stock_exchange;
-    private String short_description;
     private String long_description;
     private ArrayList<StockNews> news;
     private StockPrice price;
-     
 
-    
+    /**
+     * Create an instance of the Stock and fetch information live from the API
+     *
+     * @param ticker Stock ticker to be fetched
+     * @param fetch
+     */
+    public Stock(String ticker, boolean fetch) {
 
-    public Stock(String ticker) {
         StringBuilder sb = new StringBuilder();
         sb.append(ticker.toUpperCase());
-        
-        connectAndFetch(sb.toString());
         this.ticker = sb.toString();
-        
-        
-        
-        StockPrice stockprice= new StockPrice();
-        stockprice.connectAndFetch(this.ticker);
-        
-        price = stockprice;
-        
-        
 
-        
+        if (fetch) {
+
+            connectAndFetch(sb.toString());
+            StockPrice stockprice = new StockPrice();
+            stockprice.connectAndFetch(sb.toString());
+
+            price = stockprice;
+        }
+
     }
 
     public StockPrice getPrice() {
@@ -64,11 +61,15 @@ public final class Stock implements ApiConnection, Serializable {
     public void setPrice(StockPrice price) {
         this.price = price;
     }
-    
-    public String getStock_exchange() {
-        return stock_exchange;
-    }
 
+   
+
+    /**
+     * Connects to an external API to fetch a JSON formatted String that
+     * contains a stocks information.
+     *
+     * @param symbol passing in the ticker that we'll be fetching
+     */
     @Override
     public void connectAndFetch(String symbol) {
 
@@ -87,6 +88,7 @@ public final class Stock implements ApiConnection, Serializable {
                 while ((inputLine = in.readLine()) != null) {
                     jsonParser(inputLine);
                 }
+
             }
         } catch (MalformedURLException ex) {
             System.out.println(ex.toString());
@@ -95,6 +97,46 @@ public final class Stock implements ApiConnection, Serializable {
         }
     }
 
+    /**
+     * Parsing the JSON string and setting each stock info accordingly
+     *
+     * @param jsonStock the JSON string to parse
+     */
+    @Override
+    public void jsonParser(String jsonStock) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonStock);
+
+            ticker = jsonObject.get("ticker").toString();
+            name = jsonObject.get("name").toString();
+            business_address = jsonObject.get("business_address").toString();
+            company_url = jsonObject.get("company_url").toString();
+           
+           
+            hq_country = jsonObject.get("hq_country").toString();
+            sector = jsonObject.get("sector").toString();
+            industry_category = jsonObject.get("industry_category").toString();
+            industry_category = jsonObject.get("industry_group").toString();
+            
+ 
+            long_description = jsonObject.get("long_description").toString();
+        } catch (ParseException ex) {
+            System.out.println(ex.toString());
+        } catch (IndexOutOfBoundsException ignoreMe) {
+            System.out.println(ignoreMe.toString());
+        }catch (NullPointerException ignoreMe){
+            
+        }
+
+    }
+
+    /**
+     * A slightly different URL to fetch stock news information in a JSON
+     * formatted string
+     *
+     *
+     */
     public void connectAndFetchNews() {
 
         try {
@@ -117,9 +159,16 @@ public final class Stock implements ApiConnection, Serializable {
             System.out.println(ex.toString());
         } catch (IOException ex) {
             System.out.println(ex.toString());
+        } catch (IndexOutOfBoundsException ignoreMe) {
         }
     }
 
+    /**
+     * This method is used to parse the JSON string into multiple StockNews
+     * objects
+     *
+     * @param jsonStock
+     */
     public void newsParse(String jsonStock) {
         try {
             JSONParser parser = new JSONParser();
@@ -132,43 +181,17 @@ public final class Stock implements ApiConnection, Serializable {
                 String newsTitle = newsObj.get("title").toString();
                 String newsDate = newsObj.get("publication_date").toString();
                 String newsUrl = newsObj.get("url").toString();
-                String newsSummary = newsObj.get("summary").toString();
-                newsList.add(new StockNews(newsTitle, newsUrl, newsDate, newsSummary));
+                newsList.add(new StockNews(newsTitle, newsUrl, newsDate));
             }
             news = newsList;
 
         } catch (ParseException ex) {
             System.out.println(ex.toString());
+        } catch (IndexOutOfBoundsException ignoreMe) {
         }
     }
 
-    @Override
-    public void jsonParser(String jsonStock) {
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) parser.parse(jsonStock);
-
-            name = jsonObject.get("name").toString();
-            business_address = jsonObject.get("business_address").toString();
-            company_url = jsonObject.get("company_url").toString();
-            ceo = jsonObject.get("ceo").toString();
-            hq_state = jsonObject.get("hq_state").toString();
-            hq_country = jsonObject.get("hq_country").toString();
-            sector = jsonObject.get("sector").toString();
-            industry_category = jsonObject.get("industry_category").toString();
-            industry_category = jsonObject.get("industry_group").toString();
-            stock_exchange = jsonObject.get("stock_exchange").toString();
-            short_description = jsonObject.get("short_description").toString();
-            long_description = jsonObject.get("long_description").toString();
-        } catch (ParseException ex) {
-            System.out.println(ex.toString());
-        }
-
-    }
-
-    public String getShort_description() {
-        return short_description;
-    }
+    
 
     public String getLong_description() {
         return long_description;
@@ -198,13 +221,6 @@ public final class Stock implements ApiConnection, Serializable {
         return company_url;
     }
 
-    public String getCeo() {
-        return ceo;
-    }
-
-    public String getHq_state() {
-        return hq_state;
-    }
 
     public String getHq_country() {
         return hq_country;
@@ -218,8 +234,9 @@ public final class Stock implements ApiConnection, Serializable {
         return industry_category;
     }
 
-    public String getIndustry_group() {
-        return industry_group;
+    @Override
+    public String toString() {
+        return ticker;
     }
 
 }

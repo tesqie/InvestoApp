@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package investoapp;
 
 import java.io.BufferedReader;
@@ -18,10 +13,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
+ * A representation of the Stock price
  *
- * @author tesqie
+ * @author Abdul Tesqie
  */
-public class StockPrice implements ApiConnection,Serializable{
+public class StockPrice implements ApiConnection, Serializable {
+
     private double close;
     private double open;
 
@@ -31,12 +28,16 @@ public class StockPrice implements ApiConnection,Serializable{
     public double getClose() {
         return close;
     }
+
     public double getOpen() {
         return open;
     }
-    
-    
 
+    /**
+     * Connect and fetch stock prices in JSON format
+     *
+     * @param symbol the URL to fetch required info
+     */
     @Override
     public void connectAndFetch(String symbol) {
         try {
@@ -62,26 +63,38 @@ public class StockPrice implements ApiConnection,Serializable{
         }
     }
 
+    /**
+     * Parsing the JSON string and setting each stock price accordingly
+     *
+     * @param jsonStock the JSON string to parse
+     */
     @Override
     public void jsonParser(String jsonStock) {
         try {
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(jsonStock);
             JSONArray jsonArray = (JSONArray) jsonObject.get("data");
-            JSONObject priceObject = (JSONObject)jsonArray.get(0);
+            JSONObject priceObject = (JSONObject) jsonArray.get(0);
 
-            close = Double.parseDouble(priceObject.get("close").toString());
-            open = Double.parseDouble(priceObject.get("open").toString());
-           
+            if (!jsonObject.get("result_count").toString().equals(0)) {
+                close = Double.parseDouble(priceObject.get("close").toString());
+                open = Double.parseDouble(priceObject.get("open").toString());
+
+            }
+
         } catch (ParseException ex) {
             System.out.println(ex.toString());
+        } catch (IndexOutOfBoundsException ignoreMe) {
         }
     }
 
+    /**
+     * @return last closing price
+     *
+     */
     @Override
     public String toString() {
         return Double.toString(close);
     }
 
-    
 }

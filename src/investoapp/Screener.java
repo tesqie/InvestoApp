@@ -9,73 +9,43 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
+ * This class represents the stock screener that will return stocks based on 
+ * the user's choice.
  *
- * @author tesqie
+ * @author Abdul Tesqie
  */
 public class Screener implements ApiConnection {
-/*
-    Screener conditions:
-    EPS
-    P/E
-    sales
-    dividend rate
-    dividend payout ratio
-    dividend yield 5 year average
-    share price
-    change %
-    country
-    sector
-    group
-    avg Volume
-    Shares
-    Div/yield
-    return on equity
-    return on assets
-    3 year annual rev growth
-    3 year annual income growth
-    3 year annual dividend growth 
-    5 year annual revenue growth
-    5 year annaul income growth
-    5 year annual dividend growth
+
     
-    */
-    private String jsonTicker;
-    private String jsonValue;
-    private final String Tag;
-    private final String operator;
-    private final Double value;
+    private final String screenerUrl;
+    private final ArrayList<Stock> stocksFromScreener = new ArrayList<>();
 
-    public Screener(String Tag, String operator, Double value) {
-        this.Tag = Tag;
-        this.operator = operator;
-        this.value = value;
+    public Screener(String screenerUrl) {
+        this.screenerUrl = screenerUrl;
+
+        connectAndFetch(screenerUrl);
     }
 
-    public String getTag() {
-        return Tag;
+    public ArrayList<Stock> getStocksFromScreener() {
+        return stocksFromScreener;
     }
-
-    public String getOperator() {
-        return operator;
-    }
-
-    public Double getValue() {
-        return value;
-    }
+    
+    /**
+     * Connects to the API using the URL with the user's requested filter.
+     * @param screenerUrl The user's filter for stock to return.
+     */
 
     @Override
-    public void connectAndFetch(String symbol) {
+    public void connectAndFetch(String screenerUrl) {
         try {
 
-            URL url = new URL("https://api.intrinio.com/securities/search?conditions=" + symbol);
+            URL url = new URL("https://api.intrinio.com/securities/search?conditions=" + screenerUrl);
             URLConnection conn = url.openConnection();
             String userpass = API_USERNAME + ":" + API_PASSWORD;
             String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
@@ -90,11 +60,15 @@ public class Screener implements ApiConnection {
                 }
             }
         } catch (MalformedURLException ex) {
-            Logger.getLogger(Stock.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.toString());
         } catch (IOException ex) {
-            Logger.getLogger(Stock.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.toString());
         }
     }
+    /**
+     * Parses the JSON string into the corresponding variables.
+     * @param jsonStock The JSON string fetched by the connect and fetch method
+     */
 
     @Override
     public void jsonParser(String jsonStock) {
@@ -102,13 +76,21 @@ public class Screener implements ApiConnection {
 
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(jsonStock);
+            int total_pages = Integer.parseInt(jsonObject.get("total_pages").toString());
+            int current_page = Integer.parseInt(jsonObject.get("current_page").toString());
             JSONArray jsonArray = (JSONArray) jsonObject.get("data");
-            ArrayList<JSONObject> jsonObjArray = new ArrayList<>();
-            for (int i = 0;i <jsonArray.size();i++){
-                jsonObjArray.add((JSONObject)jsonArray.get(i));
+            //ArrayList<JSONObject> jsonObjArray = new ArrayList<>();
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                //
+                JSONObject stockFromArray = (JSONObject) jsonArray.get(i);
+                stocksFromScreener.add(
+                        new Stock(stockFromArray.get("ticker").toString(), false));
             }
-            
-            System.out.println(jsonObjArray.get(6));
+
+            if (total_pages > 1 && current_page < total_pages) {
+                connectAndFetch(screenerUrl + "&page_number=" + ++current_page);
+            }
 
         } catch (ParseException ex) {
             System.out.println(ex.toString());

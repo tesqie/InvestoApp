@@ -3,12 +3,13 @@ package investoapp;
 import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.application.HostServices;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -20,22 +21,26 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 /**
+ * The GUI of the Investo App. Connects pieces of the program together in the
+ * main method. n
  *
- * @author tesqie
+ * @author Abdul Tesqie
+ * @author Tam Huynh
  *
  */
 public class InvestoApp extends Application {
@@ -54,24 +59,21 @@ public class InvestoApp extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        BorderPane main = new BorderPane();
-        main.setPadding(new Insets(10));
-
-        Scene scene = new Scene(main, 1200, 800);
-        scene.getStylesheets().add("investoapp/InvestoStyle.css");
-
-        setLogin(main, primaryStage);
-
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Investo Application");
-        primaryStage.show();
-
+        setLogin(primaryStage);
     }
 
-    public void setLogin(BorderPane main, Stage primaryStage) {
-        primaryStage.setHeight(400);
-        primaryStage.setWidth(430);
+    /**
+     * Login page for existing accounts, Checks if USER/PASS combination is
+     * valid before logging in.
+     *
+     * @author Tam
+     * @param primaryStage
+     */
+    public void setLogin(Stage primaryStage) {
+        BorderPane main = new BorderPane();
+        Scene scene = new Scene(main, 450, 450);
 
+//making logo
         Circle titleHolder = new Circle();
         titleHolder.setRadius(75);
         titleHolder.setStroke(Color.RED);
@@ -90,6 +92,7 @@ public class InvestoApp extends Application {
         inputPane.setHgap(10);
         inputPane.setVgap(10);
 
+        //making input areas
         txtUsername = new TextField();
         txtUsername.setPrefColumnCount(10);
 
@@ -104,52 +107,71 @@ public class InvestoApp extends Application {
         centerPane.getChildren().add(inputPane);
 
         Button login = new Button("Login");
-        Button password = new Button("Password");
 
-        //login.setOnKeyPressed(value);
-        HBox buttonPane = new HBox(10, login, password);
+        setButton(login);
+
+        HBox buttonPane = new HBox(10, login);
         buttonPane.setAlignment(Pos.CENTER);
 
         centerPane.getChildren().add(buttonPane);
 
         main.setCenter(centerPane);
 
-        Button createAccBtn = new Button();
-        createAccBtn.setText("Create Account");
+        Button createAccBtn = new Button("Create Account");
+        setButton(createAccBtn);
         createAccBtn.setTextFill(Color.WHITE);
-        createAccBtn.getStyleClass().add("button");
+
+        //Switches Scene to Create Account
         createAccBtn.setOnAction(e -> {
 
-            setCreateAccount(main, primaryStage);
-            createAccBtn.setVisible(false);
+            setCreateAccount(primaryStage);
+
         });
+
+        // Checks if USER/PASS combiniaiton is valid
         login.setOnAction(e -> {
             Account account = new Account();
             ArrayList<Account> accounts = account.load();
 
             SHA256InJava sj = new SHA256InJava();
             String passwordHash = sj.getSHA256Hash(txtPassword.getText());
+            try {
+                for (int i = 0; i < accounts.size(); i++) {
 
-            for (int i = 0; i < accounts.size(); i++) {
+                    if (accounts.get(i).getUsername().equals(txtUsername.getText()) && accounts.get(i).getPassword().equals(passwordHash)) {
 
-                if (accounts.get(i).getUsername().equals(txtUsername.getText()) && accounts.get(i).getPassword().equals(passwordHash)) {
+                        liveAccount = accounts.get(i);
+                        accountIndex = i;
 
-                    liveAccount = accounts.get(i);
-                    accountIndex = i;
+                        invalidLogin.setText("");
+                        setHome(primaryStage);
 
-                    invalidLogin.setText("");
-                    setHome(main, primaryStage);
-                    createAccBtn.setVisible(false);
-                } else {
-                    invalidLogin.setText("Invalid user/pass combination");
+                    } else {
+                        invalidLogin.setText("Invalid user/pass combination");
+                    }
                 }
+            } catch (NullPointerException ignoreMe) {
+                invalidLogin.setText("Invalid user/pass combination");
             }
         });
+
         BorderPane.setAlignment(createAccBtn, Pos.BOTTOM_RIGHT);
         main.setBottom(createAccBtn);
+        main.getStyleClass().add("root");
+        scene.getStylesheets().add("investoapp/InvestoStyle.css");
+        primaryStage.setTitle("Investo Application");
+        primaryStage.setWidth(450);
+        primaryStage.setHeight(450);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
-    public void setCreateAccount(BorderPane main, Stage primaryStage) {
+    /*
+        Creates a new account for the User.
+        @author Tam
+     */
+    public void setCreateAccount(Stage primaryStage) {
+        BorderPane main = new BorderPane();
         Circle titleHolder = new Circle();
         titleHolder.setRadius(75);
         titleHolder.setStroke(Color.RED);
@@ -189,42 +211,67 @@ public class InvestoApp extends Application {
 
         Button signUp = new Button("Create");
         Button cancel = new Button("Cancel");
+        setButton(signUp);
+        setButton(cancel);
 
+        /*Creates a new account and uses RegExp to verify user input. Also checks
+          to see if the User exists already.
+        
+        
+        
+         */
         signUp.setOnAction(e -> {
             Account account = new Account();
             ArrayList<Account> accounts = account.load();
+
             int errors = 0;
-            if (!txtUsername.getText().matches("^[a-zA-Z0-9]{2,15}$")) {
-                userError.setText("Must be 2-15 characters");
-                errors++;
-            } else {
-                userError.setText("");
+            boolean taken = false;
+
+            try {
+                for (int i = 0; i < accounts.size(); i++) {
+
+                    if (accounts.get(i).getUsername().equals(txtUsername.getText())) {
+
+                        userError.setText("Username is taken");
+                        taken = true;
+                    }
+                }
+
+            } catch (NullPointerException ignoreMe) {
             }
 
-            if (!txtPassword.getText().matches("^[a-zA-Z0-9!@#\\$%\\^\\&*_=+-]{4,36}$")) {
-                passError.setText("Must be 4-36 characters");
-                errors++;
-            } else {
-                passError.setText("");
-            }
-            if (!txtEmail.getText().matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")) {
+            if (!taken) {
+                if (!txtUsername.getText().matches("^[a-zA-Z0-9]{2,15}$")) {
+                    userError.setText("Must be 2-15 characters");
+                    errors++;
+                } else {
+                    userError.setText("");
+                }
 
-                emailError.setText("Enter a valid email");
-                errors++;
-            } else {
-                emailError.setText("");
-            }
-            if (errors == 0) {
-                newAccount();
-                setLogin(main, primaryStage);
-            } else {
-                System.out.println("error");
-            }
+                if (!txtPassword.getText().matches("^[a-zA-Z0-9!@#\\$%\\^\\&*_=+-]{4,36}$")) {
+                    passError.setText("Must be 4-36 characters");
+                    errors++;
+                } else {
+                    passError.setText("");
+                }
+                if (!txtEmail.getText().matches("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")) {
 
+                    emailError.setText("Enter a valid email");
+                    errors++;
+                } else {
+                    emailError.setText("");
+                }
+                if (errors == 0) {
+                    newAccount();
+                    setLogin(primaryStage);
+                } else {
+                    System.out.println("error");
+                }
+            }
         }
         );
         cancel.setOnAction(e
-                -> setLogin(main, primaryStage));
+                -> setLogin(primaryStage));
         HBox buttonPane = new HBox(10, signUp, cancel);
 
         buttonPane.setAlignment(Pos.CENTER);
@@ -233,9 +280,19 @@ public class InvestoApp extends Application {
                 .add(buttonPane);
 
         main.setCenter(centerPane);
+        Scene createAccountScene = new Scene(main, 450, 450);
+        createAccountScene.getStylesheets().add("investoapp/InvestoStyle.css");
+        primaryStage.setWidth(450);
+        primaryStage.setHeight(450);
+        primaryStage.setScene(createAccountScene);
 
     }
 
+    /**
+     * Creating a new user
+     *
+     * @author Abdul Tesqie
+     */
     private void newAccount() {
         SHA256InJava sj = new SHA256InJava();
         String passwordHash = sj.getSHA256Hash(txtPassword.getText());
@@ -243,9 +300,22 @@ public class InvestoApp extends Application {
         newAccount.save(newAccount, -1);
     }
 
-    public void setHome(BorderPane main, Stage primaryStage) {
-        primaryStage.setHeight(800);
-        primaryStage.setWidth(1130);
+    //The homepage of the the Investo App
+    //@author Tam
+    public void setHome(Stage primaryStage) {
+        BorderPane main = new BorderPane();
+        Circle titleHolder = new Circle();
+        titleHolder.setRadius(75);
+        titleHolder.setStroke(Color.RED);
+        titleHolder.setFill(Color.WHITE);
+        titleHolder.setStrokeWidth(10);
+
+        Label appTitle = new Label("Investo");
+        StackPane holder = new StackPane(titleHolder, appTitle);
+        main.setTop(holder);
+
+        primaryStage.setHeight(550);
+        primaryStage.setWidth(725);
         Label heading = new Label("Investo");
 
         VBox centerPane = new VBox(10);
@@ -261,7 +331,7 @@ public class InvestoApp extends Application {
         searchLbl.getStyleClass().add("homeLabel");
         StackPane searchPane = new StackPane(searchCircle, searchLbl);
         searchPane.getStyleClass().add("searchPane1");
-        searchPane.setOnMouseClicked(e -> setStockInfo(main, primaryStage));
+        searchPane.setOnMouseClicked(e -> setStockInfo(primaryStage));
 
         Circle portfolioCircle = new Circle();
         portfolioCircle.setRadius(100);
@@ -270,47 +340,57 @@ public class InvestoApp extends Application {
         portfolioLbl.getStyleClass().add("homeLabel");
         StackPane portfolioPane = new StackPane(portfolioCircle, portfolioLbl);
         portfolioPane.getStyleClass().add("portfolioPane1");
-        portfolioPane.setOnMouseClicked(e -> setPortfolio(main, primaryStage));
+        portfolioPane.setOnMouseClicked(e -> setPortfolio(primaryStage));
 
-        Circle recentCircle = new Circle();
-        recentCircle.setRadius(100);
-        recentCircle.getStyleClass().add("circle");
-        Label recentLbl = new Label("Recent");
-        recentLbl.getStyleClass().add("homeLabel");
-        StackPane recentPane = new StackPane(recentCircle, recentLbl);
-        recentPane.getStyleClass().add("recentPane1");
+        Circle screenerCircle = new Circle();
+        screenerCircle.setRadius(100);
+        screenerCircle.getStyleClass().add("circle");
+        Label screenerLbl = new Label("Screener");
+        screenerLbl.getStyleClass().add("homeLabel");
+        StackPane screenerPane = new StackPane(screenerCircle, screenerLbl);
+        screenerPane.getStyleClass().add("screenerPane");
+        screenerPane.setOnMouseClicked(e -> setScreener(primaryStage));
 
-        Circle settingsCircle = new Circle();
-        settingsCircle.setRadius(100);
-        settingsCircle.getStyleClass().add("circle");
-        Label settingsLbl = new Label("Portfolio");
-        settingsLbl.getStyleClass().add("homeLabel");
-        StackPane settingsPane = new StackPane(settingsCircle, settingsLbl);
-        settingsPane.getStyleClass().add("settingsPane1");
-
-        selection.addRow(0, searchPane, portfolioPane);
-        selection.addRow(1, recentPane, settingsPane);
+        selection.addRow(0, searchPane, portfolioPane, screenerPane);
 
         HBox hbox = new HBox();
-        Button logoutBtn = new Button();
-        logoutBtn.setText("Logout");
-        logoutBtn.getStyleClass().add("button");
+        Button logoutBtn = new Button("Logout");
+        setButton(logoutBtn);
         hbox.getChildren().add(logoutBtn);
         hbox.setAlignment(Pos.BOTTOM_CENTER);
-        logoutBtn.setOnAction(e -> setLogin(main, primaryStage));
+        logoutBtn.setOnAction(e -> setLogin(primaryStage));
 
         centerPane.getChildren().add(selection);
         centerPane.getChildren().add(hbox);
         main.setCenter(centerPane);
+        Scene homeScene = new Scene(main);
+        homeScene.getStylesheets().add("investoapp/InvestoStyle.css");
+        primaryStage.setScene(homeScene);
     }
 
-    public void setPortfolio(BorderPane main, Stage primaryStage) {
+    /**
+     * Porfolio Scene, organizes user's stocks in a watch list.
+     *
+     * @param primaryStage
+     * @author Tam
+     */
+    public void setPortfolio(Stage primaryStage) {
+        BorderPane main = new BorderPane();
         //setting tabPane at top
+        Circle titleHolder = new Circle();
+        titleHolder.setRadius(75);
+        titleHolder.setStroke(Color.RED);
+        titleHolder.setFill(Color.WHITE);
+        titleHolder.setStrokeWidth(10);
+
+        Label appTitle = new Label("Investo\nPortfolio");
+        StackPane holder = new StackPane(titleHolder, appTitle);
+        main.setTop(holder);
+
         TabPane tabPane = new TabPane();
-        Tab newTab = new Tab("Add Portfolio+");
-        Tab mainTab = new Tab("Main");
+        Tab mainTab = new Tab("Portfolio");
+        mainTab.setClosable(false);
         tabPane.getTabs().add(mainTab);
-        tabPane.getTabs().add(newTab);
         main.setCenter(tabPane);
 
         //adding content
@@ -319,30 +399,26 @@ public class InvestoApp extends Application {
         HBox searchBox = new HBox();
         searchBox.setPadding(new Insets(5));
 
-        //search bar and modify button
-        TextField searchTxtFld = new TextField();
-        searchTxtFld.getStyleClass().add("searchTextField");
-        searchTxtFld.setPromptText("Search...");
-
-        Button modifyBtn = new Button("Modify");
-        modifyBtn.getStyleClass().add("button");
+        Button removeBtn = new Button("Remove Stock");
+        setButton(removeBtn);
 
         //table
         TableView<Stock> table = new TableView<>();
+
         TableColumn tickerColumn = new TableColumn("Ticker");
         TableColumn priceColumn = new TableColumn("Price");
-        TableColumn quantityColumn = new TableColumn("Quantity");
         TableColumn countryColumn = new TableColumn("Country");
         TableColumn companyColumn = new TableColumn("Company");
         TableColumn categoryColumn = new TableColumn("Category");
-        TableColumn descriptColumn = new TableColumn("Description");
-        table.getColumns().addAll(tickerColumn, priceColumn, quantityColumn, countryColumn, companyColumn, categoryColumn, descriptColumn);
+
+        table.getColumns().addAll(tickerColumn, priceColumn,
+                countryColumn, companyColumn, categoryColumn);
 
         table.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
+            if (e.getClickCount() == 2 && table.getSelectionModel().getSelectedItem() != null) {
 
                 selectedStock = table.getSelectionModel().getSelectedItem();
-                setStockInfo(main, primaryStage);
+                setStockInfo(primaryStage);
             }
 
         });
@@ -353,24 +429,33 @@ public class InvestoApp extends Application {
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("industry_category"));
         priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-        if (!(liveAccount.getPortfolio() == null)) {
+        if (liveAccount.getPortfolio() != null) {
             Portfolio portfolioMain = liveAccount.getPortfolio();
-            ArrayList<Stock> portfolioStocks = liveAccount.getPortfolio().getStock();
+            ArrayList<Stock> portfolioStocks = liveAccount.getPortfolio().getStocks();
             portfolioMain.setStock(portfolioStocks);
             liveAccount.setPortfolio(portfolioMain);
 
             table.getItems().addAll(portfolioStocks);
         }
 
-        searchBox.getChildren().addAll(searchTxtFld, modifyBtn);
+        searchBox.getChildren().add(removeBtn);
+        searchBox.setAlignment(Pos.CENTER_RIGHT);
         contentBox.getChildren().addAll(searchBox, table);
         mainTab.setContent(contentBox);
+
+        removeBtn.setOnAction(clickEvent -> {
+            liveAccount.getPortfolio().getStocks().remove(table.getSelectionModel().getSelectedItem());
+            liveAccount.save(liveAccount, accountIndex);
+            setPortfolio(primaryStage);
+
+        });
 
         //setting bottom
         HBox backHBox = new HBox();
         Button backBtn = new Button("Back");
+        setButton(backBtn);
         backBtn.setOnAction(e -> {
-            setHome(main, primaryStage);
+            setHome(primaryStage);
             backBtn.setVisible(false);
 
         });
@@ -378,20 +463,42 @@ public class InvestoApp extends Application {
         backBtn.getStyleClass().add("button");
         backHBox.getChildren().add(backBtn);
         main.setBottom(backHBox);
+        Scene portfolioScene = new Scene(main);
+        portfolioScene.getStylesheets().add("investoapp/InvestoStyle.css");
+
+        primaryStage.setHeight(600);
+        primaryStage.setWidth(720);
+        primaryStage.setScene(portfolioScene);
     }
 
-    public void setStockInfo(BorderPane main, Stage primaryStage) {
+    /**
+     * Method to change scene to the stock info page.
+     *
+     * @param primaryStage
+     * @author Tam
+     */
+    public void setStockInfo(Stage primaryStage) {
+        BorderPane main = new BorderPane();
+        StackPane logoPane = new StackPane();
+
         //set Top
+        Circle titleHolder = new Circle();
+        titleHolder.setRadius(75);
+        titleHolder.setStroke(Color.RED);
+        titleHolder.setFill(Color.WHITE);
+        titleHolder.setStrokeWidth(10);
+
+        Label appTitle = new Label("Investo\nStockInfo");
+        StackPane holder = new StackPane(titleHolder, appTitle);
+        logoPane.getChildren().add(holder);
+
         VBox topBox = new VBox();
         Label title = new Label("Stock Information");
         HBox searchBox = new HBox();
         TextField searchTxtFld = new TextField();
         searchTxtFld.getStyleClass().add("searchTextField");
-        searchTxtFld.setPromptText("Search...");
+        searchTxtFld.setPromptText("aapl...");
 
-        //Button modifyBtn = new Button("Modify");
-        //modifyBtn.getStyleClass().add("button");
-        searchBox.getChildren().addAll(searchTxtFld);
         topBox.getChildren().addAll(title, searchBox);
         topBox.setAlignment(Pos.CENTER);
 
@@ -400,39 +507,35 @@ public class InvestoApp extends Application {
         //set left
         HBox contentBox = new HBox(10);
         contentBox.setAlignment(Pos.CENTER);
-        TableView stockTable = new TableView();
 
         GridPane stockInfo = new GridPane();
         stockInfo.setAlignment(Pos.CENTER_LEFT);
 
         stockInfo.getStyleClass().add("stockInfo");
 
-        RowConstraints row1 = new RowConstraints();
-        RowConstraints row2 = new RowConstraints();
-        RowConstraints row3 = new RowConstraints();
-        RowConstraints row4 = new RowConstraints();
-        RowConstraints row5 = new RowConstraints();
-        RowConstraints row7 = new RowConstraints();
-        RowConstraints row8 = new RowConstraints();
-        RowConstraints row9 = new RowConstraints();
-        row1.setMaxHeight(75);
-        row2.setMaxHeight(75);
-        row3.setMaxHeight(75);
-        row4.setMaxHeight(75);
-        row5.setMaxHeight(75);
-        row7.setMaxHeight(75);
-        row8.setMaxHeight(75);
-        row9.setMaxHeight(400);
-        row9.setMinHeight(400);
-        stockInfo.getRowConstraints().addAll(row1, row2, row3, row4, row5, row7, row8, row9);
+        RowConstraints[] row = new RowConstraints[8];
+
+        for (int i = 0; i < 8; i++) {
+            row[i] = new RowConstraints();
+        }
+        for (int i = 1; i < 7; i++) {
+            row[i].setMinHeight(29.42);
+        }
+
+        row[7].setMinHeight(420);
+        stockInfo.getRowConstraints().addAll(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
 
         ColumnConstraints col1 = new ColumnConstraints();
         ColumnConstraints col2 = new ColumnConstraints();
+
+        col1.setMinWidth(100);
+        col1.setHalignment(HPos.CENTER);
         col2.setMaxWidth(400);
         col2.setMinWidth(400);
         stockInfo.getColumnConstraints().addAll(col1, col2);
 
-        Label companyName = new Label("Company");
+        stockInfo.setStyle("-fx-font: 15px sans-serif");
+
         Label ticker = new Label("Ticker");
         Label openPrice = new Label("Open price");
         Label closePrice = new Label("Close Price");
@@ -440,38 +543,53 @@ public class InvestoApp extends Application {
         Label industry = new Label("Industry");
         Label country = new Label("Country");
         Label description = new Label("Description");
+        description.setPadding(new Insets(5));
 
         TextField companyNameInfo = new TextField();
+        companyNameInfo.setMinHeight(29.42);
+        companyNameInfo.setMinWidth(450);
+        companyNameInfo.setAlignment(Pos.CENTER);
+        companyNameInfo.getStyleClass().add("stockBackground");
         companyNameInfo.setEditable(false);
 
         TextField tickerInfo = new TextField();
+        tickerInfo.setAlignment(Pos.CENTER);
         tickerInfo.setEditable(false);
+        tickerInfo.setPrefHeight(29.42);
 
         TextField openPriceInfo = new TextField();
+        openPriceInfo.getStyleClass().add("greyTxtFld");
         openPriceInfo.setEditable(false);
+        openPriceInfo.setPrefHeight(29.42);
 
         TextField closePriceInfo = new TextField();
+        closePriceInfo.setAlignment(Pos.CENTER);
         closePriceInfo.setEditable(false);
-
-        TextField previousCloseInfo = new TextField();
-        previousCloseInfo.setEditable(false);
+        closePriceInfo.setPrefHeight(29.42);
 
         TextField sectorInfo = new TextField();
+        sectorInfo.getStyleClass().add("greyTxtFld");
         sectorInfo.setEditable(false);
+        sectorInfo.setPrefHeight(29.42);
 
         TextField industryInfo = new TextField();
+        industryInfo.setAlignment(Pos.CENTER);
         industryInfo.setEditable(false);
+        industryInfo.setPrefHeight(29.42);
 
         TextField countryInfo = new TextField();
+        countryInfo.getStyleClass().add("greyTxtFld");
         countryInfo.setEditable(false);
+        countryInfo.setPrefHeight(29.42);
 
         TextArea descriptionInfo = new TextArea(" ");
         descriptionInfo.setEditable(false);
         descriptionInfo.setMaxWidth(400);
         descriptionInfo.setWrapText(true);
-        descriptionInfo.setMaxHeight(400);
+        descriptionInfo.setMaxHeight(420);
+        descriptionInfo.setPrefHeight(29.42);
 
-        stockInfo.addRow(0, companyName, companyNameInfo);
+        //stockInfo.addRow(0, companyNameInfo);
         stockInfo.addRow(1, ticker, tickerInfo);
         stockInfo.addRow(2, openPrice, openPriceInfo);
         stockInfo.addRow(3, closePrice, closePriceInfo);
@@ -482,16 +600,14 @@ public class InvestoApp extends Application {
 
         Label newsLbl = new Label("News");
         newsLbl.getStyleClass().add("newsLbl");
+        newsLbl.setPrefHeight(29.42);
         newsLbl.setPrefWidth(600);
 
         ListView<StockNews> newsArea = new ListView<>();
+        newsArea.setMinHeight(602);
 
-//        TextArea newsTxtArea = new TextArea();
-//        newsTxtArea.setEditable(false);
-//        newsTxtArea.setMaxHeight(600);
-//        newsTxtArea.setMinHeight(590);
-//        newsTxtArea.setMaxWidth(600);
-//        newsTxtArea.setMinWidth(600);
+        newsArea.setStyle("-fx-font: 15px sans-serif");
+
         GridPane newsPane = new GridPane();
 
         newsPane.addRow(0, newsLbl);
@@ -501,47 +617,61 @@ public class InvestoApp extends Application {
         RowConstraints rowNews = new RowConstraints();
         rowNews.setMaxHeight(75);
 
-        contentBox.getChildren().addAll(stockInfo, newsPane);
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(companyNameInfo, stockInfo);
+
+        contentBox.getChildren().addAll(vBox, newsPane);
 
         main.setCenter(contentBox);
+        main.setPadding(new Insets(12));
 
         //set center
-        //set Bottem
+        //set Bottom
         Button backBtn = new Button("Back");
+        setButton(backBtn);
         HBox hboxBtn = new HBox(backBtn);
 
         hboxBtn.setAlignment(Pos.BOTTOM_RIGHT);
+
         backBtn.setOnAction(e -> {
-
-            setHome(main, primaryStage);
-            searchBox.setVisible(false);
-            backBtn.setVisible(false);
-
+            setHome(primaryStage);
         });
         main.setBottom(hboxBtn);
+        Pane spacer = new Pane();
+        HBox.setHgrow(
+                spacer,
+                Priority.SOMETIMES
+        );
+        VBox searchVbox = new VBox();
+        searchVbox.setSpacing(5);
+        Button searchTicker = new Button("Search Ticker:");
+        searchTicker.setStyle("-fx-font: 15px sans-serif;-fx-background-color:rosybrown;-fx-text-fill: white;");
+        VBox rightVBox = new VBox();
+
         Button addtoPortfolio = new Button("add to portfolio");
-        searchBox.getChildren().add(addtoPortfolio);
+        setButton(addtoPortfolio);
+        Button resetBtn = new Button("Reset");
+        setButton(resetBtn);
+
+        Label responseLbl = new Label();
+        rightVBox.setSpacing(5);
+        rightVBox.setAlignment(Pos.CENTER_RIGHT);
+
+        rightVBox.getChildren().addAll(addtoPortfolio, resetBtn, responseLbl);
+        searchVbox.getChildren().addAll(searchTicker, searchTxtFld);
+        searchBox.getChildren().addAll(searchVbox, spacer, rightVBox);
 
         if (selectedStock != null) {
             Stock stock = selectedStock;
-            descriptionInfo.setText(stock.getLong_description());
-            companyNameInfo.setText(stock.getName());
-            tickerInfo.setText(stock.getTicker());
-            openPriceInfo.setText("$" + Double.toString(stock.getPrice().getOpen()));
-            closePriceInfo.setText("$" + Double.toString(stock.getPrice().getClose()));
-            industryInfo.setText(stock.getIndustry_category());
-
-            sectorInfo.setText(stock.getSector());
-            countryInfo.setText(stock.getHq_country());
+            fillStockInfo(descriptionInfo, stock, companyNameInfo, tickerInfo, openPriceInfo, closePriceInfo, industryInfo, sectorInfo, countryInfo);
 
             ArrayList<StockNews> stockNews = stock.getNews();
-          
 
             HostServices host = getHostServices();
 
-            
             newsArea.getItems().setAll(stockNews);
-            
+
             newsArea.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2) {
                     StockNews selectedNews = newsArea.getSelectionModel().getSelectedItem();
@@ -552,41 +682,336 @@ public class InvestoApp extends Application {
         }
 
         searchTxtFld.setOnAction(e -> {
+            Stock stock = new Stock(searchTxtFld.getText(), true);
 
-            Stock stock = new Stock(searchTxtFld.getText());
-            stock.connectAndFetchNews();
+            if (stock.getName() != null) {
+                selectedStock = stock;
 
+                selectedStock.connectAndFetchNews();
+
+                fillStockInfo(descriptionInfo, selectedStock, companyNameInfo, tickerInfo, openPriceInfo, closePriceInfo, industryInfo, sectorInfo, countryInfo);
+
+                ArrayList<StockNews> stockNews = selectedStock.getNews();
+                Hyperlink link = new Hyperlink();
+                TextField t = new TextField();
+
+                try {
+                    newsArea.getItems().setAll(stockNews);
+                } catch (NullPointerException ignoreMe) {
+                }
+
+                HostServices host = getHostServices();
+
+                newsArea.setOnMouseClicked(clickEvent -> {
+                    if (clickEvent.getClickCount() == 2) {
+                        StockNews selectedNews = newsArea.getSelectionModel().getSelectedItem();
+                        host.showDocument(selectedNews.getUrl());
+                    }
+                });
+
+            } else {
+                responseLbl.setText("You have entered a wrong ticker.");
+            }
+
+        });
+
+        resetBtn.setOnAction(e -> {
+            emptyStockInfo(descriptionInfo, companyNameInfo, tickerInfo, openPriceInfo, closePriceInfo, industryInfo, sectorInfo, countryInfo);
+            newsArea.getItems().clear();
+            selectedStock = null;
+            responseLbl.setText("");
+        });
+
+        addtoPortfolio.setOnAction(event -> {
+            Account account = new Account();
+            if (liveAccount.getPortfolio() == null) {
+                liveAccount.setPortfolio(new Portfolio());
+                liveAccount.getPortfolio().setStock(new ArrayList<>());
+                if (selectedStock != null) {
+                    liveAccount.getPortfolio().getStocks().add(selectedStock);
+                }
+                account.save(liveAccount, accountIndex);
+
+            } else if (liveAccount.getPortfolio() != null) {
+                boolean exists = false;
+                try {
+                    for (int i = 0; i < liveAccount.getPortfolio().getStocks().size(); i++) {
+                        if (liveAccount.getPortfolio().getStocks().get(i).getTicker().equals(selectedStock.getTicker())) {
+                            exists = true;
+                            responseLbl.setText("The stock is already in your portfolio.");
+                        }
+                    }
+
+                    if (!exists && selectedStock != null) {
+                        liveAccount.getPortfolio().getStocks().add(selectedStock);
+                        account.save(liveAccount, accountIndex);
+                        responseLbl.setText("Your stock has been added.");
+                    }
+                    if (selectedStock == null) {
+                        responseLbl.setText("You must select a stock.");
+                    }
+                } catch (NullPointerException ex) {
+                    responseLbl.setText("You must select a stock.");
+                }
+            }
+
+        });
+
+        VBox vbox = new VBox();
+        vbox.getChildren().addAll(logoPane, main);
+        vbox.setSpacing(7);
+
+        Scene stockScene = new Scene(vbox);
+        stockScene.getStylesheets().add("investoapp/InvestoStyle.css");
+        primaryStage.setWidth(1000);
+        primaryStage.setHeight(975);
+        primaryStage.setScene(stockScene);
+    }
+
+    /**
+     * A method to fill in the Stock Info based on the ticker that is searched.
+     *
+     * @author Tam
+     *
+     */
+    private void fillStockInfo(TextArea descriptionInfo, Stock stock, TextField companyNameInfo, TextField tickerInfo, TextField openPriceInfo, TextField closePriceInfo, TextField industryInfo, TextField sectorInfo, TextField countryInfo) {
+        if (stock.getTicker() != null) {
             descriptionInfo.setText(stock.getLong_description());
             companyNameInfo.setText(stock.getName());
             tickerInfo.setText(stock.getTicker());
             openPriceInfo.setText("$" + Double.toString(stock.getPrice().getOpen()));
             closePriceInfo.setText("$" + Double.toString(stock.getPrice().getClose()));
             industryInfo.setText(stock.getIndustry_category());
-
             sectorInfo.setText(stock.getSector());
             countryInfo.setText(stock.getHq_country());
+        }
+    }
 
-            ArrayList<StockNews> stockNews = stock.getNews();
-            Hyperlink link = new Hyperlink();
-            TextField t = new TextField();
+    //Emptying the stock Info when reset button is pressed.
+    //@author Tam
+    private void emptyStockInfo(TextArea descriptionInfo, TextField companyNameInfo, TextField tickerInfo, TextField openPriceInfo, TextField closePriceInfo, TextField industryInfo, TextField sectorInfo, TextField countryInfo) {
 
-            newsArea.getItems().setAll(stockNews);
-            
-            addtoPortfolio.setOnAction(event -> {
-                Account account = new Account();
-                if (liveAccount.getPortfolio() == null) {
-                    liveAccount.setPortfolio(new Portfolio());
-                    liveAccount.getPortfolio().setStock(new ArrayList<>());
-                    liveAccount.getPortfolio().addStock(stock);
-                    account.save(liveAccount, accountIndex);
+        descriptionInfo.setText("");
+        companyNameInfo.setText("");
+        tickerInfo.setText("");
+        openPriceInfo.setText("");
+        closePriceInfo.setText("");
+        industryInfo.setText("");
+        sectorInfo.setText("");
+        countryInfo.setText("");
 
-                } else {
-                    liveAccount.getPortfolio().addStock(stock);
-                    account.save(liveAccount, accountIndex);
+    }
+
+    /**
+     * The screener scene to filter stocks
+     *
+     * @param primaryStage
+     * @author Tam
+     */
+    public void setScreener(Stage primaryStage) {
+
+        GridPane screenerPane = new GridPane();
+        screenerPane.setPadding(new Insets(10));
+        screenerPane.setGridLinesVisible(true);
+        screenerPane.getStyleClass().add("stockInfo");
+        screenerPane.setPrefSize(600, 600);
+        screenerPane.setAlignment(Pos.CENTER);
+
+        //set top
+        StackPane logoPane = new StackPane();
+
+        Circle titleHolder = new Circle();
+        titleHolder.setRadius(75);
+        titleHolder.setStroke(Color.RED);
+        titleHolder.setFill(Color.WHITE);
+        titleHolder.setStrokeWidth(10);
+
+        Label appTitle = new Label("Investo\nScreener");
+        StackPane holder = new StackPane(titleHolder, appTitle);
+        logoPane.getChildren().add(holder);
+
+        Label criteriaLbl = new Label("Criteria");
+        Label conditionLbl = new Label("Condition");
+        Label valueLbl = new Label("Value");
+
+        //something else
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        ColumnConstraints col3 = new ColumnConstraints();
+
+        RowConstraints row1 = new RowConstraints();
+        RowConstraints row2 = new RowConstraints();
+
+        col1.setMinWidth(200);
+        col1.setHalignment(HPos.LEFT);
+
+        col2.setMinWidth(200);
+        col2.setHalignment(HPos.CENTER);
+
+        col3.setMinWidth(200);
+        col3.setHalignment(HPos.CENTER);
+
+        // ComboBox[] conditionBox = new ComboBox[7];
+        ArrayList<ComboBox> conditionBox = new ArrayList<>();
+        ArrayList<TextField> valueFld = new ArrayList<>();
+
+        ArrayList<CheckBox> chkBox = new ArrayList<>();
+        chkBox.add(new CheckBox("Earnings Per Share"));
+        chkBox.add(new CheckBox("Price"));
+        chkBox.add(new CheckBox("Dividend Yield"));
+        chkBox.add(new CheckBox("Market Cap"));
+        chkBox.add(new CheckBox("52 Week High"));
+        chkBox.add(new CheckBox("P/E Ratio"));
+
+        String[] conditions = {"Greater than", "Less Than"};
+
+        for (int i = 0; i < 6; i++) {
+
+            conditionBox.add(new ComboBox());
+            valueFld.add(new TextField());
+            conditionBox.get(i).getItems().addAll(conditions);
+
+            screenerPane.addRow(i + 1, chkBox.get(i), conditionBox.get(i), valueFld.get(i));
+
+        }
+
+        screenerPane.getColumnConstraints().addAll(col1, col2, col3);
+
+        screenerPane.addRow(0, criteriaLbl, conditionLbl, valueLbl);
+
+        screenerPane.getRowConstraints().addAll(row1, row2);
+
+        Label stockLbl = new Label("Screened Stock");
+        ListView<Stock> stockList = new ListView();
+        stockList.setMinHeight(400);
+        stockList.setMinWidth(400);
+
+        GridPane stockListPane = new GridPane();
+        stockListPane.addRow(0, stockLbl);
+        stockListPane.addRow(1, stockList);
+        stockListPane.setAlignment(Pos.CENTER);
+
+        Button backBtn = new Button("Back");
+        backBtn.setAlignment(Pos.BOTTOM_LEFT);
+        setButton(backBtn);
+
+        backBtn.setOnAction(e -> {
+            setHome(primaryStage);
+        });
+        Pane spacer = new Pane();
+        HBox.setHgrow(
+                spacer,
+                Priority.SOMETIMES
+        );
+
+        Button searchBtn = new Button("Search");
+        setButton(searchBtn);
+        searchBtn.setAlignment(Pos.BOTTOM_RIGHT);
+
+        HBox hboxBtn = new HBox();
+        hboxBtn.getChildren().addAll(searchBtn, spacer, backBtn);
+
+        /*Checks to see what user selected for the screener and fetches the 
+        the correct filter.
+        
+        @author Abdul Tesqie
+        
+         */
+        searchBtn.setOnAction(e -> {
+            StringBuilder screenerUrl = new StringBuilder();
+            for (int i = 0; i < conditionBox.size(); i++) {
+                String criteria = null;
+                String condition = null;
+                String value;
+                if (chkBox.get(i).isSelected()) {
+                    switch (i) {
+                        case 0:
+                            criteria = "basiceps";
+                            break;
+                        case 1:
+                            criteria = "close_price";
+                            break;
+                        case 2:
+                            criteria = "dividendyield";
+                            break;
+                        case 3:
+                            criteria = "marketcap";
+                            break;
+                        case 4:
+                            criteria = "52_week_high";
+                            break;
+                        case 5:
+                            criteria = "pricetoearnings";
+                            break;
+                        default:
+                            break;
+                    }
+                    switch (conditionBox.get(i).getSelectionModel().getSelectedIndex()) {
+                        case 0:
+                            condition = "gt";
+                            break;
+                        case 1:
+                            condition = "lt";
+                            break;
+
+                    }
+                    value = valueFld.get(i).getText();
+                    screenerUrl.append(criteria);
+                    screenerUrl.append("~");
+                    screenerUrl.append(condition);
+                    screenerUrl.append("~");
+                    screenerUrl.append(value);
+                    screenerUrl.append(",");
                 }
-            });
+
+            }
+
+            Screener screener = new Screener(screenerUrl.toString());
+            stockList.getItems().clear();
+            stockList.getItems().addAll(screener.getStocksFromScreener());
 
         });
 
+        stockList.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+
+                selectedStock = new Stock(stockList.getSelectionModel().getSelectedItem().getTicker(), true);
+                selectedStock.connectAndFetchNews();
+                setStockInfo(primaryStage);
+            }
+        });
+
+        BorderPane paneScreener = new BorderPane();
+        //screener
+        paneScreener.setLeft(screenerPane);
+        paneScreener.setBottom(hboxBtn);
+        paneScreener.setCenter(stockListPane);
+        paneScreener.setTop(logoPane);
+
+        Scene sceneScreener = new Scene(paneScreener);
+        sceneScreener.getStylesheets().add("investoapp/InvestoStyle.css");
+        primaryStage.setHeight(675);
+        primaryStage.setWidth(1050);
+        primaryStage.setScene(sceneScreener);
+        primaryStage.show();
+
+    }
+
+    /**
+     * On hover the button switches colors to blue to indicate the mouse is on
+     * the button
+     *
+     * @param button
+     *
+     * @author Tam
+     */
+    public void setButton(Button button) {
+        button.getStyleClass().add("button");
+        button.setOnMouseEntered((MouseEvent t) -> {
+            button.setStyle("-fx-background-color:blue;");
+        });
+        button.setOnMouseExited((MouseEvent t) -> {
+            button.setStyle("-fx-background-color:rosybrown;");
+        });
     }
 }

@@ -4,25 +4,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+ * Representing the User's portfolio of stocks.
  *
- * @author tesqie
+ * @author Abdul Tesqie
  */
 public class Portfolio implements Serializable {
-    private ArrayList<Stock> stock;
 
-    public Portfolio() {
-        
-    }
+    private ArrayList<Stock> stocks;
 
-    public ArrayList<Stock> getStock() {
-        return stock;
+    public ArrayList<Stock> getStocks() {
+        return stocks;
     }
 
     public void setStock(ArrayList<Stock> stock) {
-        this.stock = stock;
-    }    
-    public void addStock(Stock stock) {
-        this.stock.add(stock);
-    }    
-    
+        this.stocks = stock;
+    }
+
 }

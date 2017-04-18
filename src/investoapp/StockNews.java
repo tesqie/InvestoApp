@@ -4,26 +4,30 @@ package investoapp;
 
 import java.io.Serializable;
 
-
 /**
- *
- * @author tesqie
+ *this class represents a stockNews object.
+ * @author Abdul Tesqie
  */
-public class StockNews implements Serializable{
+
+
+public class StockNews implements Serializable {
+
     private final String title;
     private final String url;
     private final String date;
 
-    
-    
-    
-
-    public StockNews(String title, String url, String date, String summary) {
+    /**
+     *
+     * @param title The title of the news article
+     * @param url the URL of the news article
+     * @param date the date of the news article
+     * 
+     */
+    public StockNews(String title, String url, String date) {
         this.title = title;
         this.url = url;
         this.date = date;
     }
-    
 
     public String getTitle() {
         return title;
@@ -36,13 +40,15 @@ public class StockNews implements Serializable{
     public String getDate() {
         return date;
     }
-
+    /**
+     * To string override to format the stock news in the listView on the stockInfo Scene
+     * @return 
+     */
 
     @Override
     public String toString() {
         String formatNews = "%s\n%s";
-        return String.format(formatNews, title,date);
+        return String.format(formatNews, title, date);
     }
 
-    
 }

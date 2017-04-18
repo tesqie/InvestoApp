@@ -1,18 +1,25 @@
+
+/*
+** Stying the app using CSS
+**@author Tam
+**
+*/
+
 .settingsPane1{
     -fx-background-color: greenyellow;  
 }
 .portfolioPane1{
     -fx-background-color: red;  
 }
-.recentPane1{
-    -fx-background-color: blueviolet;  
+.screenerPane{
+    -fx-background-color: brown;  
 }
 
 .searchPane1{
-    -fx-background-color: grey;  
+    -fx-background-color: blueviolet;  
 }
-.searchTextField{
- 
+.background{
+    -fx-backgroun-color: light grey;
 
 }
 .homeLabel{
@@ -22,10 +29,12 @@
 .button{
     -fx-background-color: rosybrown;
     -fx-text-fill: white;
+    -fx-font: 15px sans-serif;
+
 
 }
-.buttonAdd{
-    -fx-background-color: indigo;
+.buttonHover{
+    -fx-background-color: blue;
     -fx-text-fill: white;
 }
 scene{
@@ -45,15 +54,38 @@ scene{
 }
 
 .stockInfo {
-   
+
     -fx-grid-lines-visible: true;
-       
+
 }
 
 .newsLbl{
     -fx-border-style: solid;
     -fx-alignment:CENTER; 
-    -fx-background-color:aqua;
+    -fx-background-color:navy;
+    -fx-text-fill: white;
+    -fx-font: 15px Tohoma;
+
+}
+.stockBackground{
+    -fx-border-style: solid;
+    -fx-alignment:CENTER; 
+    -fx-background-color:maroon;
     -fx-padding: 3px;
-    
+    -fx-text-fill: white;
+    -fx-font: 15px sans-serif;
+
+}
+
+.greyTxtFld{
+    -fx-border-style: solid;
+    -fx-alignment:CENTER; 
+    -fx-background-color:gainsboro;
+    -fx-padding: 3px;
+    -fx-text-fill: black;
+    -fx-font: 15px sans-serif;
+
+}
+label{
+    -fx-alignment:CENTER; 
 }

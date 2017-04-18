@@ -8,12 +8,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
+ * Represents the user's account. Includes username,password, email and
+ * portfolio. The class is serializable to persist user information to a file.
  *
- * @author tesqie
+ * @author Abdul Tesqie
  */
 public class Account implements Serializable {
 
@@ -22,9 +22,21 @@ public class Account implements Serializable {
     private String email;
     private Portfolio portfolio;
 
+    /**
+     * Empty Account constructor to access the save and load methods for other
+     * accounts
+     */
     public Account() {
     }
 
+    /**
+     * Account constructor used when creating an account for the first time.
+     *
+     *
+     * @param username User's username
+     * @param password User's password
+     * @param email User's email
+     */
     public Account(String username, String password, String email) {
         this.username = username;
         this.password = password;
@@ -34,7 +46,7 @@ public class Account implements Serializable {
     public Portfolio getPortfolio() {
         return portfolio;
     }
-    
+
     public void setPortfolio(Portfolio portfolio) {
         this.portfolio = portfolio;
     }
@@ -51,13 +63,16 @@ public class Account implements Serializable {
         return email;
     }
 
+    /**
+     * Saving an Array list of accounts to a file
+     *
+     *
+     *
+     * @param saveAccount the Account being added and saved to the array list
+     * @param index The index of the account relative to the array list
+     */
+    public void save(Account saveAccount, int index) {
 
-//    @Override
-//    public String toString() {
-//        return getUsername() + "=" + getPassword();
-//    }
-    
-    public void save(Account saveAccount,int index) {
         File file = new File("creds.ser");
         ArrayList<Account> accounts;
 
@@ -68,13 +83,11 @@ public class Account implements Serializable {
 
             } else {
                 accounts = load();
-                if (index == -1){
-                accounts.add(saveAccount);
-                }else if (index >=0){
-                accounts.set(index, saveAccount);
+                if (index == -1) {
+                    accounts.add(saveAccount);
+                } else if (index >= 0) {
+                    accounts.set(index, saveAccount);
                 }
-                    
-                
             }
 
             try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("creds.ser"))) {
@@ -83,13 +96,18 @@ public class Account implements Serializable {
 
         } catch (IOException e) {
         } catch (Exception ex) {
-            Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.toString());
         }
     }
 
+    /**
+     * Loading an array list of accounts to be used when a user is logging in
+     *
+     * @return an array list of all the accounts in the system
+     */
+
     public ArrayList<Account> load() {
-        
-        
+
         try (FileInputStream fis = new FileInputStream("creds.ser");
                 ObjectInputStream ois = new ObjectInputStream(fis)) {
             ArrayList<Account> accounts = (ArrayList<Account>) ois.readObject();
@@ -98,9 +116,8 @@ public class Account implements Serializable {
         } catch (IOException ioe) {
             System.out.println(ioe.toString());
         } catch (ClassNotFoundException c) {
-            System.out.println("Class not found");
+            System.out.println(c.toString());
         }
         return null;
     }
-
 }
