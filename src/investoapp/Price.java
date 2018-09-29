@@ -27,6 +27,7 @@ public class Price implements ApiConnection {
     private double high;
     private double low;
     private double close;
+    private double max;
     
     @Override
     public void connectAndFetch(String symbol) {
